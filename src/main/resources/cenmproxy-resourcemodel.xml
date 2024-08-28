@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configEntity xmlns="http://www.ericsson.com/oss/itpf/deployment/dst/descriptor">
+    <description>eric-oss-enm-aa-proxy</description>
+    <singleton>true</singleton>
+    <scaleUnit>
+        <loadDrivers>
+            <!-- LoadDriver for simultaneous connections to cenmproxy-->
+            <loadDriver name="cenmproxynumberofconnectionsimultaneously" description=" BR-CN-proxy-01 Cloud Native ENM Backup and Restore application uses a single cenm proxy connection. Test results indicate the component can support up to 1700 connections"/>
+        </loadDrivers>
+        <minimumUnit>
+            <!--minimumUnit.profile.cpuCores : number of vcpu allocated to the POD in cloud deployment-->
+            <!--minimumUnit.profile.cpuMinutes : value for cpu minutes per day required under no load -->
+            <!--minimumUnit.profile.peakCpuMinutes : value for cpu minutes in busy hour required under no load -->
+            <!--minimumUnit.profile.memory : value for memory required under no load-->
+            <!--minimumUnit.profileConversionFormulae : this section is not required to be filled in at present-->
+            <profile>
+                <cpuCores>1</cpuCores>
+                <cpuMinutes>219</cpuMinutes>
+                <peakCpuMinutes>9</peakCpuMinutes>
+                <memory>1717</memory>
+            </profile>
+            <profileConversionFormulae>
+                <cpuCores>0</cpuCores>
+                <cpuMinutes>(cenmproxynoloadcpuminutes)</cpuMinutes>
+                <peakCpuMinutes>0</peakCpuMinutes>
+                <memory>0</memory>
+          </profileConversionFormulae>
+        </minimumUnit>
+        <optimalUnit>
+            <!--optimalUnit.profile.cpuCores : number of vcpu allocated to the POD-->
+            <!--optimalUnit.profile.cpuMinutes : after testing this is the cpu minutes per day used under sustainable load-->
+            <!--optimalUnit.profile.peakCpuMinutes : after testing this is the cpu minutes in a busy hour used under sustainable load-->
+            <!--optimalUnit.profile.memory : during initial introduction this is the RAM allocated to the VM when it is introduced into the deployment. after testing it is the maximum memory used under sustainable load-->
+            <!--optimalUnit.profileConversionFormulae : No input required-->
+            <profile>
+                <cpuCores>1</cpuCores>
+                <cpuMinutes>600</cpuMinutes>
+                <peakCpuMinutes>9</peakCpuMinutes>
+                <memory>1717</memory>
+            </profile>
+            <profileConversionFormulae>
+                <cpuCores>0</cpuCores>
+                <cpuMinutes>IF(OR(enm_deployment_type="Small_CloudNative_ENM",enm_deployment_type="Extra_Large_CloudNative_ENM"),(cenmproxynoloadcpuminutes+(cenmproxycpuminutesperconnection*cenmproxynumberofconnectionsimultaneously)),0)</cpuMinutes>
+                <peakCpuMinutes>0</peakCpuMinutes>
+                <memory>0</memory>
+            </profileConversionFormulae>
+        </optimalUnit>
+    </scaleUnit>
+    <parameters>
+        <!-- Properties for calculation -->
+        <property name="cenmproxynoloadcpuminutes" defaultValue="219" description="Measured cpu usage under no load" />
+        <property name="cenmproxyunderloadcpuminutes" defaultValue="600" description="Measured cpu usage under load" />
+        <property name="cenmproxycpuminutesperconnection" defaultValue="0.224" description="subtract cenmproxynoloadcpuminutes from cenmproxyunderloadcpuminutes and divide the result by 1700" />
+    </parameters>
+    <deploymentDependencies>
+        <deploymentDependency>
+            <groupId>ENM-Parent/SQ-Gate/com.ericsson.oss.services</groupId>
+            <artifactId>eric-oss-enm-aa-proxy</artifactId>
+            <version></version>
+            <alias>cenmproxy-number-of-connections-simultaneously</alias>
+            <qualifier>GLOBAL</qualifier>
+            <loadDriverConverters>
+                <loadConversionFormula dependencyLoadDriver="cenmproxynumberofconnectionsimultaneously">(1)</loadConversionFormula>
+            </loadDriverConverters>
+        </deploymentDependency>
+    </deploymentDependencies>
+</configEntity>

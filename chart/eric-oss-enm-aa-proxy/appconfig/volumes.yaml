@@ -1,0 +1,7 @@
+- name: data
+  persistentVolumeClaim:
+    claimName: data
+- name: gp
+  configMap:
+    name: gpcenmproxy
+
